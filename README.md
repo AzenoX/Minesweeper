@@ -1,24 +1,9 @@
-# demineur.alexishayat.me
+# Minesweeper
 
 ## Project setup
-```
-npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Well, just a minesweeper game, including 4 levels
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Visit
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+[https://minesweeper.alexishayat.me/](https://minesweeper.alexishayat.me/)
