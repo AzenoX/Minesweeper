@@ -18,6 +18,7 @@ const router = createRouter({
     routes,
 })
 
+document.title = "Minesweeper | Alexis Hayat";
 
 const app = createApp(App)
 
