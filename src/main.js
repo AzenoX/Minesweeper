@@ -21,6 +21,7 @@ const router = createRouter({
 })
 
 document.title = "Minesweeper | Alexis Hayat";
+document.body.classList.add('blue-grey', 'darken-4')
 
 const app = createApp(App)
 app.use(ToastPlugin);

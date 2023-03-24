@@ -1,14 +1,14 @@
 <template>
   <div>
     <div id="board">
-      <h1>Difficulty: {{ difficulty }}</h1>
+      <h1 class="white-text">Difficulty: {{ difficulty }}</h1>
       <div>
-        <router-link to="/easy"><button @click="init">Easy</button></router-link>
-        <router-link to="/medium"><button @click="init">Medium</button></router-link>
-        <router-link to="/hard"><button @click="init">Hard</button></router-link>
-        <router-link to="/insane"><button @click="init">Insane</button></router-link>
+        <router-link to="/easy"><button class="waves-effect waves-light blue btn" style="margin-right: 2px; margin-left: 2px;" @click="init">Easy</button></router-link>
+        <router-link to="/medium"><button class="waves-effect waves-light blue btn" style="margin-right: 2px; margin-left: 2px;" @click="init">Medium</button></router-link>
+        <router-link to="/hard"><button class="waves-effect waves-light blue btn" style="margin-right: 2px; margin-left: 2px;" @click="init">Hard</button></router-link>
+        <router-link to="/insane"><button class="waves-effect waves-light blue btn" style="margin-right: 2px; margin-left: 2px;" @click="init">Insane</button></router-link>
       </div>
-      <br><br>
+      <br>
 
       <div class="cells">
         <div
@@ -57,6 +57,21 @@ export default {
   },
   created() {
     this.init();
+  },
+  mounted() {
+    let materialDesignScript = document.createElement('script')
+    materialDesignScript.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js')
+    document.head.appendChild(materialDesignScript)
+
+    let materialDesignStyle = document.createElement('link')
+    materialDesignStyle.setAttribute('rel', 'stylesheet')
+    materialDesignStyle.setAttribute('href', 'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css')
+    document.head.appendChild(materialDesignStyle)
+
+    let materialDesignIcons = document.createElement('link')
+    materialDesignIcons.setAttribute('rel', 'stylesheet')
+    materialDesignIcons.setAttribute('href', 'https://fonts.googleapis.com/icon?family=Material+Icons')
+    document.head.appendChild(materialDesignIcons)
   },
   methods: {
     init() {
@@ -340,7 +355,8 @@ export default {
   z-index: 0;
 }
 h1 {
-  margin: 0;
+  margin: 1vh;
+  font-size: 3rem;
 }
 .cells {
   --count: 30;
@@ -367,6 +383,7 @@ h1 {
   justify-content: center;
   align-items: center;
 
+  background: #455a64;
   box-shadow: 0 0 2px 0 #000;
   font-weight: bold;
 
@@ -379,7 +396,7 @@ h1 {
   content: '';
 
   position: absolute;
-  background: #e5e5e5;
+  background: #37474f;
   box-shadow: 0 0 2px 0 #000;
   top: 0;
   left: 0;
@@ -398,28 +415,28 @@ h1 {
   z-index: 99999999;
 }
 .cell-count-1 {
-  color: #3b82f6;
+  color: #03a9f4;
 }
 .cell-count-2 {
-  color: #22c55e;
+  color: #4caf50;
 }
 .cell-count-3 {
-  color: #ef4444;
+  color: #f44336;
 }
 .cell-count-4 {
-  color: #4338ca;
+  color: #ab47bc;
 }
 .cell-count-5 {
-  color: #a21caf;
+  color: #fdd835;
 }
 .cell-count-6 {
-  color: #b45309;
+  color: #fb8c00;
 }
 .cell-count-7 {
-  color: #db2777;
+  color: #e91e63;
 }
 .cell-count-8 {
-  color: #065f46;
+  color: #009688;
 }
 
 @keyframes tilt-n-move-shaking {
