@@ -12,7 +12,7 @@
 
       <div class="cells">
         <div
-            class="cell "
+            class="cell hided"
             @click.left="reveal($event)"
             @click.right.prevent="block($event)"
             v-for="cell in grid"
@@ -40,7 +40,8 @@ export default {
   },
   data() {
     return {
-      grid: [...(new Array(30 * 30).fill(0))],
+      size: 30,
+      grid: [],
       gameIsRunning: true,
       percent: {
         easy: 0.03,
@@ -50,6 +51,8 @@ export default {
       },
       fireworks: null,
       bomb: '💣',
+      statusBlocked: 'blocked',
+      statusHided: 'hided'
     }
   },
   created() {
@@ -66,84 +69,63 @@ export default {
       });
 
       setTimeout(() => {
-        this.grid = [...(new Array(30 * 30).fill(0))];
+        // Create an empty grid
+        const grid = new Array(this.size).fill(null).map(() => new Array(this.size).fill(null));
 
-        this.grid.forEach((c, i) => {
-          if (Math.random() <= this.percent[this.difficulty]) {
-            this.grid[i] = this.bomb;
+        // Fill the grid with bombs
+        const numBombs = Math.floor(this.size * this.size * this.percent[this.difficulty]);
+        let bombsPlaced = 0;
+        while (bombsPlaced < numBombs) {
+          const row = Math.floor(Math.random() * this.size);
+          const col = Math.floor(Math.random() * this.size);
+          if (grid[row][col] !== this.bomb) {
+            grid[row][col] = this.bomb;
+            bombsPlaced++;
           }
-        });
+        }
 
-        this.updateCells();
+        // Fill in the numbers
+        for (let row = 0; row < this.size; row++) {
+          for (let col = 0; col < this.size; col++) {
+            if (grid[row][col] === null) {
+              const numSurroundingBombs = this.countSurroundBombs(grid, row, col);
+              grid[row][col] = numSurroundingBombs === 0 ? '' : numSurroundingBombs;
+            }
+          }
+        }
+
+        // Flatten the grid and update the cells
+        this.grid = grid.flat();
+        setTimeout(() => {
+          this.updateCells();
+        }, 100);
       }, 100);
     },
     updateCells() {
-      this.grid.forEach((c, i) => {
-        if (this.grid[i] !== this.bomb) {
-          const count = this.countSurroundBombs(i);
-          this.grid[i] = count === 0 ? '' : count;
-
-          this.$nextTick(() => {
-            document.querySelectorAll('.cell')[i].classList.add('cell-count-' + count)
-          })
+      this.grid.forEach((cell, i) => {
+        const count = cell === '' ? '' : parseInt(cell);
+        document.querySelectorAll('.cell')[i].classList.add('cell-count-' + count);
+        if (cell === '') {
+          document.querySelectorAll('.cell')[i].textContent = '';
         }
       });
     },
-    countSurroundBombs(i) {
-      // Delete if bound
-      let cells = [];
-      if (i - 30 <= 0) {
-        cells = [
-          this.grid[i - 1],
-          this.grid[i + 1],
-          this.grid[i + 30 - 1],
-          this.grid[i + 30],
-          this.grid[i + 30 + 1],
-        ]
-      } else if (i + 30 >= 30 * 30) {
-        cells = [
-          this.grid[i - 30 - 1],
-          this.grid[i - 30],
-          this.grid[i - 30 + 1],
-          this.grid[i - 1],
-          this.grid[i + 1],
-        ]
-      } else if (i % 30 === 0) {
-        cells = [
-          this.grid[i - 30],
-          this.grid[i - 30 + 1],
-          this.grid[i + 1],
-          this.grid[i + 30],
-          this.grid[i + 30 + 1],
-        ]
-      } else if (((i + 1) % 30) === 0) {
-        cells = [
-          this.grid[i - 30 - 1],
-          this.grid[i - 30],
-          this.grid[i - 1],
-          this.grid[i + 30 - 1],
-          this.grid[i + 30],
-        ]
-      } else {
-        cells = [
-          this.grid[i - 30 - 1],
-          this.grid[i - 30],
-          this.grid[i - 30 + 1],
-          this.grid[i - 1],
-          this.grid[i + 1],
-          this.grid[i + 30 - 1],
-          this.grid[i + 30],
-          this.grid[i + 30 + 1],
-        ]
+    countSurroundBombs(grid, row, col) {
+      let count = 0;
+      for (let i = Math.max(0, row - 1); i <= Math.min(this.size - 1, row + 1); i++) {
+        for (let j = Math.max(0, col - 1); j <= Math.min(this.size - 1, col + 1); j++) {
+          if (grid[i][j] === this.bomb) {
+            count++;
+          }
+        }
       }
-
-      return cells.filter(e => e === this.bomb).length;
+      return count;
     },
     reveal(e) {
       if (this.gameIsRunning) {
         const target = e.target;
-        if (!target.classList.contains('blocked')) {
-          target.classList.remove('hided');
+        if (!target.classList.contains(this.statusBlocked)) {
+          target.classList.remove(this.statusHided);
 
           // Check for empty cells
           if (target.textContent === '') {
@@ -156,8 +138,8 @@ export default {
                 const adjacentIndexes = this.getAdjacentIndexes(index);
                 adjacentIndexes.forEach(i => {
                   const adjacentCell = document.querySelectorAll('.cell')[i];
-                  if (adjacentCell.classList.contains('hided')) {
-                    adjacentCell.classList.remove('hided');
+                  if (adjacentCell.classList.contains(this.statusHided) && !adjacentCell.classList.contains(this.statusBlocked)) {
+                    adjacentCell.classList.remove(this.statusHided);
                     if (adjacentCell.textContent === '') {
                       cells.push(adjacentCell);
                     }
@@ -168,7 +150,7 @@ export default {
           }
 
           // Win of the game
-          if (Array.from(document.querySelectorAll('.cell')).filter(el => el.classList.contains('hided') && el.textContent !== this.bomb).length === 0) {
+          if (Array.from(document.querySelectorAll('.cell')).filter(el => el.classList.contains(this.statusHided) && el.textContent !== this.bomb).length === 0) {
             this.win();
           }
 
@@ -194,8 +176,8 @@ export default {
     },
     block(e) {
       if (this.gameIsRunning) {
-        if (e.target.classList.contains('hided')) {
-          e.target.classList.toggle('blocked');
+        if (e.target.classList.contains(this.statusHided)) {
+          e.target.classList.toggle(this.statusBlocked);
         }
       }
     },
@@ -213,60 +195,60 @@ export default {
         });
       }, 500);
 
-    const container = document.querySelector('#fireworks');
-    const fireworks = new Fireworks(container, {
-      autoresize: false,
-      opacity: 0.5,
-      acceleration: 1.05,
-      friction: 0.97,
-      gravity: 1.5,
-      particles: 50,
-      traceLength: 3,
-      traceSpeed: 10,
-      explosion: 5,
-      intensity: 30,
-      flickering: 50,
-      lineStyle: 'round',
-      hue: {
-        min: 0,
-        max: 360
-      },
-      delay: {
-        min: 30,
-        max: 60
-      },
-      rocketsPoint: {
-        min: 50,
-        max: 50
-      },
-      lineWidth: {
-        explosion: {
-          min: 1,
-          max: 3
+      const container = document.querySelector('#fireworks');
+      const fireworks = new Fireworks(container, {
+        autoresize: false,
+        opacity: 0.5,
+        acceleration: 1.05,
+        friction: 0.97,
+        gravity: 1.5,
+        particles: 50,
+        traceLength: 3,
+        traceSpeed: 10,
+        explosion: 5,
+        intensity: 30,
+        flickering: 50,
+        lineStyle: 'round',
+        hue: {
+          min: 0,
+          max: 360
         },
-        trace: {
-          min: 1,
-          max: 2
+        delay: {
+          min: 30,
+          max: 60
+        },
+        rocketsPoint: {
+          min: 50,
+          max: 50
+        },
+        lineWidth: {
+          explosion: {
+            min: 1,
+            max: 3
+          },
+          trace: {
+            min: 1,
+            max: 2
+          }
+        },
+        brightness: {
+          min: 50,
+          max: 80
+        },
+        decay: {
+          min: 0.015,
+          max: 0.03
+        },
+        mouse: {
+          click: true,
+          move: false,
+          max: 10
         }
-      },
-      brightness: {
-        min: 50,
-        max: 80
-      },
-      decay: {
-        min: 0.015,
-        max: 0.03
-      },
-      mouse: {
-        click: false,
-        move: false,
-        max: 1
-      }
-    });
-    fireworks.start();
+      });
+      fireworks.start();
       setTimeout(() => {
-        fireworks.stop(true);
-      }, 7000);
+        fireworks.waitStop(true);
+      }, 10000);
     },
     lose() {
       this.endOfGame();
@@ -333,7 +315,7 @@ export default {
       });
       fireworks.start();
       setTimeout(() => {
-        fireworks.stop(true);
+        fireworks.waitStop(true);
       }, 5000);
     }
   }
