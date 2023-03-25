@@ -113,6 +113,11 @@ export default {
         this.grid = grid.flat();
         setTimeout(() => {
           this.updateCells();
+
+          // Add hint
+          if (this.difficulty === 'insane') {
+            document.querySelector('.cell.cell-count-')?.classList.remove('hided');
+          }
         }, 100);
       }, 100);
     },
